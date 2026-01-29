@@ -1,0 +1,5 @@
+{
+  "name": "SaaS Checkout Platform",
+  "description": "A multi-merchant SaaS platform allowing merchants to configure products and customized checkout flows.",
+  "requestFramePermissions": []
+}
