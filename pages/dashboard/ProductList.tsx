@@ -54,8 +54,8 @@ export const ProductList: React.FC = () => {
 
   if (isEditing) {
     return (
-      <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold mb-6">{currentProduct.id ? 'Edit Product' : 'New Product'}</h2>
+      <div className="max-w-2xl mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800">
+        <h2 className="text-xl font-bold text-white mb-6">{currentProduct.id ? 'Edit Product' : 'New Product'}</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <Input 
             label="Product Name" 
@@ -80,9 +80,9 @@ export const ProductList: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Description</label>
             <textarea 
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-700 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-900/50 text-gray-200"
               rows={3}
               value={currentProduct.description || ''}
               onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})}
@@ -95,7 +95,7 @@ export const ProductList: React.FC = () => {
             placeholder="https://..."
           />
           {currentProduct.imageUrl && (
-            <img src={currentProduct.imageUrl} alt="Preview" className="h-32 w-32 object-cover rounded-lg border" />
+            <img src={currentProduct.imageUrl} alt="Preview" className="h-32 w-32 object-cover rounded-lg border border-gray-700" />
           )}
           <div className="flex justify-end gap-3 mt-6">
             <Button type="button" variant="secondary" onClick={() => setIsEditing(false)}>Cancel</Button>
@@ -109,35 +109,35 @@ export const ProductList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+        <h1 className="text-2xl font-bold text-white">Products</h1>
         <Button onClick={() => { setCurrentProduct({}); setIsEditing(true); }}>
-          <Plus size={20} /> Add Product
+          <Plus size={18} /> Add Product
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map(product => (
-          <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-            <div className="h-48 overflow-hidden bg-gray-100">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+          <div key={product.id} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden flex flex-col group">
+            <div className="h-48 overflow-hidden bg-gray-800">
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
             <div className="p-5 flex-1 flex flex-col">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">{product.name}</h3>
-                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                <h3 className="font-semibold text-lg text-white line-clamp-1">{product.name}</h3>
+                <span className="bg-orange-500/10 text-orange-400 text-xs px-2 py-1 rounded-full font-medium">
                   €{product.price.toFixed(2)}
                 </span>
               </div>
-              <p className="text-gray-500 text-sm mb-4 flex-1 line-clamp-2">{product.description}</p>
-              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                <span className="text-sm text-gray-500 flex items-center gap-1">
+              <p className="text-gray-400 text-sm mb-4 flex-1 line-clamp-2">{product.description}</p>
+              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-800">
+                <span className="text-sm text-gray-400 flex items-center gap-1">
                   <Package size={16} /> {product.stock} in stock
                 </span>
                 <div className="flex gap-2">
-                  <button onClick={() => { setCurrentProduct(product); setIsEditing(true); }} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                  <button onClick={() => { setCurrentProduct(product); setIsEditing(true); }} className="p-2 text-gray-500 hover:text-orange-500 hover:bg-gray-800 rounded-lg transition-colors">
                     <Edit2 size={18} />
                   </button>
-                  <button onClick={() => handleDelete(product.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <button onClick={() => handleDelete(product.id)} className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-800 rounded-lg transition-colors">
                     <Trash2 size={18} />
                   </button>
                 </div>

@@ -27,6 +27,7 @@ export interface Merchant {
   themeColorPrimary: string;
   themeColorSecondary: string;
   stripePublishableKey: string;
+  stripeSecretKey?: string; // Ajout de la clé secrète
   shippingMethods: ShippingMethod[];
   chronopostConfig?: {
     enabled: boolean;

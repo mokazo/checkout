@@ -55,7 +55,8 @@ export const mockApi = {
     return new Promise((resolve) => setTimeout(() => resolve(merchantStore), 500));
   },
 
-  login: async (email: string): Promise<Merchant> => {
+  login: async (email: string, password?: string): Promise<Merchant> => {
+    console.log(`Simulating login for ${email} with password...`);
     // Simulate login finding an existing merchant
     if (!merchantStore) {
         // For demo purposes, if logging in fresh, we restore the mock merchant
@@ -65,7 +66,8 @@ export const mockApi = {
     return new Promise((resolve) => setTimeout(() => resolve(merchantStore!), 800));
   },
 
-  register: async (email: string): Promise<Merchant> => {
+  register: async (email: string, password?: string): Promise<Merchant> => {
+    console.log(`Simulating registration for ${email} with password...`);
     // Create a fresh merchant without a subdomain yet
     const newMerchant: Merchant = {
         ...MOCK_MERCHANT,
@@ -74,6 +76,8 @@ export const mockApi = {
         companyName: '',
         subdomain: '',
         logoUrl: '',
+        stripePublishableKey: '',
+        stripeSecretKey: '',
         shippingMethods: [],
     };
     merchantStore = newMerchant;

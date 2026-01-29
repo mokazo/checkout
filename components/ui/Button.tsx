@@ -3,7 +3,6 @@ import React from 'react';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   isLoading?: boolean;
-  customColor?: string; // For merchant branding overrides
 }
 
 export const Button: React.FC<ButtonProps> = ({ 
@@ -11,39 +10,30 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary', 
   className = '', 
   isLoading, 
-  customColor,
-  style,
   ...props 
 }) => {
-  const baseStyles = "px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2";
+  const baseStyles = "px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
   
   let variantStyles = "";
   switch (variant) {
     case 'primary':
-      variantStyles = customColor 
-        ? `text-white hover:brightness-110 shadow-sm` 
-        : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm";
+      variantStyles = "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500 shadow-sm";
       break;
     case 'secondary':
-      variantStyles = "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50";
+      variantStyles = "bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-700 focus:ring-gray-600";
       break;
     case 'danger':
-      variantStyles = "bg-red-50 text-red-600 hover:bg-red-100";
+      variantStyles = "bg-red-900/50 text-red-400 hover:bg-red-900/80 hover:text-red-300 focus:ring-red-500";
       break;
     case 'ghost':
-      variantStyles = "text-gray-600 hover:bg-gray-100";
+      variantStyles = "text-gray-400 hover:bg-gray-800 hover:text-white focus:ring-gray-700";
       break;
   }
-
-  const combinedStyle = customColor && variant === 'primary' 
-    ? { ...style, backgroundColor: customColor } 
-    : style;
 
   return (
     <button 
       className={`${baseStyles} ${variantStyles} ${className}`}
       disabled={isLoading || props.disabled}
-      style={combinedStyle}
       {...props}
     >
       {isLoading ? (
