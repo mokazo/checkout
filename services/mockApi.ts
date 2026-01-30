@@ -49,6 +49,8 @@ let ordersStore: Order[] = [
   }
 ];
 
+const RESERVED_SUBDOMAINS = ['test', 'admin', 'shop', 'checkout', 'store'];
+
 export const mockApi = {
   // Simulates checking if a user is logged in
   getCurrentUser: async (): Promise<Merchant | null> => {
@@ -91,8 +93,12 @@ export const mockApi = {
   },
 
   checkSubdomainAvailability: async (subdomain: string): Promise<boolean> => {
-     // Simulate network check
-     return new Promise((resolve) => setTimeout(() => resolve(true), 400));
+     console.log(`Checking availability for: ${subdomain}`);
+     return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(!RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase()));
+        }, 400);
+     });
   },
 
   // Simulate Chronopost API verification

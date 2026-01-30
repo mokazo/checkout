@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { mockApi } from '../../services/mockApi';
 import { Merchant } from '../../types';
-import { Store, Check, ArrowRight, CreditCard, ArrowLeft, Lock } from 'lucide-react';
+import { Store, Check, ArrowRight, CreditCard, ArrowLeft, Lock, Loader, AlertCircle } from 'lucide-react';
 import { INITIAL_SHIPPING_METHODS } from '../../constants';
 
 interface OnboardingPageProps {
   merchant: Merchant;
   onComplete: (updatedMerchant: Merchant) => void;
 }
+
+type SubdomainStatus = 'IDLE' | 'CHECKING' | 'AVAILABLE' | 'UNAVAILABLE';
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ merchant, onComplete }) => {
   const [step, setStep] = useState(1);
@@ -18,6 +20,41 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ merchant, onComp
   const [stripePublishableKey, setStripePublishableKey] = useState('');
   const [stripeSecretKey, setStripeSecretKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const [subdomainStatus, setSubdomainStatus] = useState<SubdomainStatus>('IDLE');
+  const [subdomainError, setSubdomainError] = useState('');
+  // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
+  const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (subdomain.length < 3) {
+      setSubdomainStatus('IDLE');
+      setSubdomainError('');
+      return;
+    }
+
+    setSubdomainStatus('CHECKING');
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      const isAvailable = await mockApi.checkSubdomainAvailability(subdomain);
+      if (isAvailable) {
+        setSubdomainStatus('AVAILABLE');
+        setSubdomainError('');
+      } else {
+        setSubdomainStatus('UNAVAILABLE');
+        setSubdomainError('This subdomain is already taken.');
+      }
+    }, 500);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [subdomain]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -32,6 +69,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ merchant, onComp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (subdomainStatus !== 'AVAILABLE') return;
     setIsLoading(true);
     try {
       const updatedMerchant = await mockApi.updateMerchant({
@@ -48,6 +86,36 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ merchant, onComp
       setIsLoading(false);
     }
   };
+
+  const renderSubdomainStatus = () => {
+    if (subdomain.length < 3) return null;
+
+    switch (subdomainStatus) {
+      case 'CHECKING':
+        return (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader className="animate-spin text-gray-500" size={18} />
+          </div>
+        );
+      case 'AVAILABLE':
+        return (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-center gap-3 mt-3">
+                <Check className="w-5 h-5 text-green-400" />
+                <p className="text-green-300 text-sm font-medium">https://{subdomain}.achetele.com is available!</p>
+            </div>
+        );
+      case 'UNAVAILABLE':
+        return (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-3 mt-3">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <p className="text-red-300 text-sm font-medium">{subdomainError}</p>
+            </div>
+        );
+      default:
+        return null;
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
@@ -81,29 +149,25 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ merchant, onComp
 
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">Your web address (Subdomain)</label>
-                  <div className="flex rounded-md shadow-sm border border-gray-700 focus-within:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500">
-                    <input
-                        type="text"
-                        className="flex-1 block w-full rounded-none rounded-l-md pl-4 sm:text-sm bg-gray-900 text-white border-0 focus:ring-0 py-3"
-                        placeholder="my-awesome-store"
-                        value={subdomain}
-                        onChange={handleSubdomainChange}
-                        required
-                    />
-                    <span className="inline-flex items-center px-4 rounded-r-md border-l border-gray-700 bg-gray-800 text-gray-400 font-medium sm:text-sm">
-                      .achetele.com
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-500">Your checkout page will be available at this address.</p>
-                </div>
-
-                {subdomain && (
-                    <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-center gap-3">
-                        <Check className="w-5 h-5 text-green-400" />
-                        <p className="text-green-300 text-sm font-medium">https://{subdomain}.achetele.com is available!</p>
+                  <div className="relative">
+                    <div className="flex rounded-md shadow-sm border border-gray-700 focus-within:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500">
+                        <input
+                            type="text"
+                            className="flex-1 block w-full rounded-none rounded-l-md pl-4 sm:text-sm bg-gray-900 text-white border-0 focus:ring-0 py-3"
+                            placeholder="my-awesome-store"
+                            value={subdomain}
+                            onChange={handleSubdomainChange}
+                            required
+                        />
+                        <span className="inline-flex items-center px-4 rounded-r-md border-l border-gray-700 bg-gray-800 text-gray-400 font-medium sm:text-sm">
+                        .achetele.com
+                        </span>
                     </div>
-                )}
-                 <Button type="button" onClick={() => setStep(2)} className="w-full text-lg py-3 mt-4" disabled={!companyName || !subdomain}>
+                  </div>
+                   {renderSubdomainStatus()}
+                </div>
+                
+                 <Button type="button" onClick={() => setStep(2)} className="w-full text-lg py-3 mt-4" disabled={!companyName || subdomainStatus !== 'AVAILABLE'}>
                     Continue <ArrowRight className="w-5 h-5" />
                 </Button>
               </div>
